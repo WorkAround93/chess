@@ -10,12 +10,10 @@ import * as theme from "./components/styles/GlobalStyles";
 function App() {
     const [cgs, setCgs] = useReducer(
         stateReducer,
-        new State(savedState, false, false)
+        new State(savedState, false)
     );
 
-    useEffect(() => {
-        console.log(cgs.terminal, cgs.winner);
-    }, [cgs]);
+    useEffect(() => {}, [cgs]);
 
     return (
         <ThemeProvider theme={theme.globalTheme}>

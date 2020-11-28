@@ -6,37 +6,42 @@ import { IState, IStateAttr } from "./interfaces/iState";
 import { createFigures } from "./savedStates/createFigures";
 import { isValid } from "./moveValidation/isValid";
 import Action from "../action/action";
+import King from "../figure/figures/king";
+import { FigureType } from "../figure/enums/figureType";
 
 class State implements IState {
     board: ITile[];
     whiteFigures: Array<IFigure>;
     blackFigures: Array<IFigure>;
+    whiteKing: IFigure;
+    blackKing: IFigure;
     turn: number;
     terminal: boolean;
     winner: number;
-    actions: Array<IAction>;
+    whiteActions: Array<IAction>;
+    blackActions: Array<IAction>;
     actionHistory: IAction[];
 
-    constructor(
-        objectState: IStateAttr,
-        onlyValid: boolean = true,
-        callReducer: boolean = false
-    ) {
-        if (callReducer) console.log(objectState);
+    constructor(objectState: IStateAttr, onlyValid: boolean = true) {
         this.board = [];
         this.whiteFigures = [];
         this.blackFigures = [];
         this.turn = objectState.turn;
         this.terminal = objectState.terminal;
         this.winner = objectState.winner;
-        this.actions = [];
+        this.blackActions = [];
+        this.whiteActions = [];
         this.actionHistory = [];
+        this.whiteKing = new King(1, 0, "k");
+        this.blackKing = new King(1, 0, "k");
         this.createEmptyBoard(objectState);
         this.getMoves(onlyValid);
     }
 
     humanMove(iFrom: number, iTo: number): string {
-        this.actions.forEach((action) => {
+        const actions =
+            this.turn % 2 === 1 ? this.whiteActions : this.blackActions;
+        actions.forEach((action) => {
             const { figure, to } = action;
             const { index } = figure;
             if (index === iFrom && iTo === to) {
@@ -97,6 +102,10 @@ class State implements IState {
             );
             this.board[fig.index].figure = fig;
             this.blackFigures.push(fig);
+
+            if (fig.type === FigureType.KING) {
+                this.blackKing = fig;
+            }
         });
         objectState.whiteFigures.forEach((element: IFigure) => {
             const { id, index, type, player, touched, attacked } = element;
@@ -110,6 +119,9 @@ class State implements IState {
             );
             this.board[fig.index].figure = fig;
             this.whiteFigures.push(fig);
+            if (fig.type === FigureType.KING) {
+                this.whiteKing = fig;
+            }
         });
         objectState.actionHistory.forEach((element: IAction) => {
             const { figure, to, flag, specialFigure, specialTo } = element;
@@ -124,25 +136,34 @@ class State implements IState {
         this.winner = this.turn % 2 === 0 ? 1 : -1;
     }
 
-    getMoves(onlyValid: boolean) {
-        const figures =
-            this.turn % 2 === 0 ? this.blackFigures : this.whiteFigures;
-        const actions: Array<IAction> = [];
-        figures.forEach((fig) => {
-            const m = fig.getMoves(this.board);
-            m.forEach((action) => {
-                actions.push(action);
+    getFiguresMoves(figures: Array<IFigure>): Array<IAction> {
+        const retVal: Array<IAction> = [];
+        figures.forEach((fig: IFigure) => {
+            const figMoves = fig.getMoves(this);
+            figMoves.forEach((action) => {
+                retVal.push(action);
             });
         });
+        return retVal;
+    }
+    // King is recognized here
+    getMoves(onlyValid: boolean) {
+        this.whiteKing.attacked?.clear();
+        this.blackKing.attacked?.clear();
+        this.whiteActions = this.getFiguresMoves(this.whiteFigures);
+        this.blackActions = this.getFiguresMoves(this.blackFigures);
+        this.whiteActions = this.getFiguresMoves(this.whiteFigures);
         if (onlyValid) {
-            actions.forEach((action) => {
-                const stringState = JSON.stringify(this);
-                if (isValid(stringState, JSON.stringify(action)))
-                    this.actions.push(action);
-                if (this.actions.length === 0) this.setTerminal();
-            });
-        } else {
-            this.actions = actions;
+            const turnBasedAction: Array<IAction> =
+                this.turn % 2 === 1 ? this.whiteActions : this.blackActions;
+            const validActions = isValid(JSON.stringify(this), turnBasedAction);
+            if (validActions.length === 0) {
+                this.setTerminal();
+            } else if (this.turn % 2 === 1) {
+                this.whiteActions = validActions;
+            } else {
+                this.blackActions = validActions;
+            }
         }
     }
 }

@@ -1,6 +1,8 @@
 import { ITile } from "../../tile/interfaces/iTile";
 import { IFigure } from "../../figure/interfaces/iFigure";
 import { IAction } from "../../action/interfaces/iAction";
+import King from "../../figure/figures/king";
+import Tile from "../../tile/tile";
 
 export interface IStateAttr {
     /**
@@ -12,13 +14,16 @@ export interface IStateAttr {
      * @var winner -> 1=white 2=black -1=none 0=draw
      * @var actions -> Set of  possible actions for this State
      */
-    board: ITile[];
+    board: Tile[];
     whiteFigures: Array<IFigure>;
     blackFigures: Array<IFigure>;
+    whiteKing: IFigure;
+    blackKing: IFigure;
     turn: number;
     terminal: boolean;
     winner: number;
-    actions: Array<IAction>;
+    whiteActions: Array<IAction>;
+    blackActions: Array<IAction>;
     actionHistory: Array<IAction>;
 }
 

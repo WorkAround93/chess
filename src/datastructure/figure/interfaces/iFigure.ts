@@ -1,6 +1,7 @@
 import { IAction } from "../../action/interfaces/iAction";
 import { FigureType } from "../enums/figureType";
 import { ITile } from "../../tile/interfaces/iTile";
+import State from "../../state/state";
 
 export interface IFigureAttr {
     id: string;
@@ -8,9 +9,9 @@ export interface IFigureAttr {
     index: number;
     type: FigureType;
     touched?: boolean;
-    attacked?: IFigure[];
+    attacked?: Set<number>;
 }
 
 export interface IFigure extends IFigureAttr {
-    getMoves(board: ITile[]): IAction[];
+    getMoves(state: State): IAction[];
 }

@@ -8,10 +8,10 @@ export const stateReducer = (state: State, action: ReducerAction) => {
                 action.payload.from,
                 action.payload.to
             );
-            state = new State(JSON.parse(saved), true, false);
+            state = new State(JSON.parse(saved), true);
             return state;
         case reducerType.reset:
-            return new State(savedState, true, true);
+            return new State(savedState, true);
     }
 };
 

@@ -1,9 +1,10 @@
-import { Console } from "console";
+import Action from "../../action/action";
 import { IAction } from "../../action/interfaces/iAction";
-import { FigureType } from "../../figure/enums/figureType";
+
+import King from "../../figure/figures/king";
 import State from "../state";
 
-export const isValid = (state: string, action: string): boolean => {
+export const isValid = (state: string, actions: Action[]): Action[] => {
     /**
      * Steps to check for legal move
      * 1. DeepCopy the state by parsing= nState (n)
@@ -13,27 +14,33 @@ export const isValid = (state: string, action: string): boolean => {
      *
      * first move queen 24
      */
-    let flg = true;
-    const thisState = getStateFromString(state);
-
-    const nState = advanceStringState(state, action);
-
-    nState.actions.forEach((nAction) => {
-        if (nState.board[nAction.to].figure?.type === FigureType.KING) {
-            flg = false;
-        }
-    });
-
-    // if (flg) {
-    //     console.log(`\n`);
-    //     console.log("this STATE", thisState);
-    //     console.log("next STATE", nState);
-    // }
-    return flg;
-};
-
-const getStateFromString = (state: string): State => {
-    return new State(JSON.parse(state), false);
+    let nState = new State(JSON.parse(state), false);
+    const color: boolean = nState.turn % 2 === 1;
+    let nKing = color ? (nState.blackKing as King) : (nState.whiteKing as King);
+    // If the King is being attacked by multiple sources he must move.
+    if (nKing.attacked.size > 1) {
+        const vActions = actions.filter(
+            (action) =>
+                action.figure.index === nKing.index &&
+                !(nState.turn % 2 === 0
+                    ? nState.board[action.to].occupiedByBlack
+                    : nState.board[action.to].occupiedByWhite)
+        );
+        return vActions;
+    } else {
+        const vActions: Array<IAction> = [];
+        actions.forEach((action) => {
+            const stringAction = JSON.stringify(action); // kill dependencies
+            nState = advanceStringState(state, stringAction);
+            const advancedKing = !color
+                ? (nState.blackKing as King)
+                : (nState.whiteKing as King);
+            if (advancedKing.attacked.size === 0) {
+                vActions.push(action);
+            }
+        });
+        return vActions;
+    }
 };
 
 export const advanceStringState = (state: string, action: string): State => {
@@ -43,4 +50,8 @@ export const advanceStringState = (state: string, action: string): State => {
         JSON.parse(bState.humanMove(bAction.figure.index, bAction.to)),
         false
     );
+};
+
+const getStateFromString = (state: string): State => {
+    return new State(JSON.parse(state), false);
 };

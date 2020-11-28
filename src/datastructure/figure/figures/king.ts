@@ -1,9 +1,9 @@
 import { IFigure } from "../interfaces/iFigure";
 import { IAction } from "../../action/interfaces/iAction";
 import Action from "../../action/action";
-import { ITile } from "../../tile/interfaces/iTile";
 import { FigureType } from "../enums/figureType";
 import { inBound } from "../utils/inBound";
+import State from "../../state/state";
 
 class King implements IFigure {
     id: string;
@@ -11,24 +11,30 @@ class King implements IFigure {
     type: FigureType;
     player: number;
     index: number;
-    attacked: IFigure[];
+    attacked: Set<number>;
 
     constructor(
         player: number,
         index: number,
         id: string,
         touched: boolean = false,
-        attacked: IFigure[] = []
+        attacked: Set<number> = new Set()
     ) {
         this.player = player;
         this.index = index;
         this.type = FigureType.KING;
         this.touched = touched;
         this.id = id;
-        this.attacked = attacked;
+        this.attacked = new Set();
+        if (attacked.size > 0) {
+            attacked.forEach((num: number) => {
+                this.attacked.add(num);
+            });
+        }
     }
 
-    getMoves(board: ITile[]): IAction[] {
+    getMoves(state: State): IAction[] {
+        const { board } = state;
         const actions: Action[] = [];
         const direction = [-9, -8, -7, -1, 1, 7, 8, 9];
         direction.forEach((x) => {
@@ -40,10 +46,13 @@ class King implements IFigure {
             // increase occupied tiles
             board[newIndex].occupy(this.player);
             const tile = board[newIndex];
-            const occupied =
-                this.player === 1 ? tile.occupiedByBlack : tile.occupiedByWhite;
+            if (
+                (this.player === 1 && tile.occupiedByBlack) ||
+                (this.player === -1 && tile.occupiedByWhite)
+            ) {
+                return;
+            }
             // return  if the position can be captured
-            if (occupied) return;
             const { figure } = tile;
             if (figure !== null) {
                 if (figure.player !== this.player)
@@ -57,6 +66,10 @@ class King implements IFigure {
 
         return actions;
     }
+
+    addToAttacked = (idx: number) => {
+        this.attacked.add(idx);
+    };
 }
 
 export default King;

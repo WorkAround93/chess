@@ -12,7 +12,7 @@ export const createFigures = (
     index: number,
     type: number,
     touched: boolean | undefined,
-    attacked: IFigure[] | undefined
+    attacked: Set<number> | undefined
 ): IFigure => {
     switch (type) {
         case 0:
