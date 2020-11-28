@@ -3,7 +3,7 @@ export const savedState: any = {
     terminal: false,
     winner: 0,
     blackFigures: [
-        // { id: "b_r0", player: -1, index: 0, type: 1, touched: false },
+        { id: "b_r0", player: -1, index: 0, type: 1, touched: false },
         // { id: "b_k0", player: -1, index: 1, type: 2 },
         // { id: "b_b0", player: -1, index: 2, type: 3 },
         {
@@ -17,7 +17,7 @@ export const savedState: any = {
         { id: "b_q", player: -1, index: 4, type: 4 },
         // { id: "b_b1", player: -1, index: 5, type: 3 },
         // { id: "b_k1", player: -1, index: 6, type: 2 },
-        // { id: "b_r1", player: -1, index: 7, type: 1, touched: false },
+        { id: "b_r1", player: -1, index: 7, type: 1, touched: false },
         // { id: "b_p0", player: -1, index: 8, type: 0, touched: false },
         // { id: "b_p1", player: -1, index: 9, type: 0, touched: false },
         // { id: "b_p2", player: -1, index: 10, type: 0, touched: false },
@@ -28,7 +28,7 @@ export const savedState: any = {
         // { id: "b_p7", player: -1, index: 15, type: 0, touched: false },
     ],
     whiteFigures: [
-        // { id: "w_r0", player: 1, index: 56, type: 1, touched: false },
+        { id: "w_r0", player: 1, index: 56, type: 1, touched: false },
         // { id: "w_k0", player: 1, index: 57, type: 2 },
         //{ id: "w_b0", player: 1, index: 58, type: 3 },
         {
@@ -42,7 +42,7 @@ export const savedState: any = {
         { id: "w_q", player: 1, index: 60, type: 4 },
         // { id: "w_b0", player: 1, index: 61, type: 3 },
         // { id: "w_k1", player: 1, index: 62, type: 2 },
-        // { id: "w_r1", player: 1, index: 63, type: 1, touched: false },
+        { id: "w_r1", player: 1, index: 63, type: 1, touched: false },
         // { id: "w_p0", player: 1, index: 48, type: 0, touched: false },
         // { id: "w_p1", player: 1, index: 49, type: 0, touched: false },
         // { id: "w_p2", player: 1, index: 50, type: 0, touched: false },

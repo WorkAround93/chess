@@ -4,6 +4,8 @@ import Action from "../../action/action";
 import { FigureType } from "../enums/figureType";
 import { inBound } from "../utils/inBound";
 import State from "../../state/state";
+import { ITile } from "../../tile/interfaces/iTile";
+import Rook from "./rook";
 
 class King implements IFigure {
     id: string;
@@ -46,12 +48,7 @@ class King implements IFigure {
             // increase occupied tiles
             board[newIndex].occupy(this.player);
             const tile = board[newIndex];
-            if (
-                (this.player === 1 && tile.occupiedByBlack) ||
-                (this.player === -1 && tile.occupiedByWhite)
-            ) {
-                return;
-            }
+            if (this.tileOccupiedByEnemy(tile)) return;
             // return  if the position can be captured
             const { figure } = tile;
             if (figure !== null) {
@@ -63,13 +60,76 @@ class King implements IFigure {
             }
         });
         //rochade
-
+        if (!this.touched && this.attacked.size === 0) {
+            let flg = true;
+            let nIdx = this.index;
+            const towerLeftIdx = nIdx - 3;
+            const towerRightIdx = nIdx + 4;
+            if (
+                board[towerLeftIdx].hasFigure() &&
+                board[towerLeftIdx].figure?.type === FigureType.ROOK
+            ) {
+                const rook = board[towerLeftIdx].figure as Rook;
+                if (!rook.touched) {
+                    nIdx -= 1;
+                    while (nIdx > towerLeftIdx) {
+                        const tile = board[nIdx];
+                        if (
+                            tile.figure === null &&
+                            this.tileOccupiedByEnemy(tile)
+                        ) {
+                            flg = false;
+                        }
+                        nIdx -= 1;
+                    }
+                    if (flg)
+                        actions.push(
+                            new Action(
+                                this,
+                                this.index - 2,
+                                true,
+                                rook,
+                                this.index - 1
+                            )
+                        );
+                }
+            }
+            if (
+                board[towerRightIdx].hasFigure() &&
+                board[towerRightIdx].figure?.type === FigureType.ROOK
+            ) {
+                const rook = board[towerRightIdx].figure as Rook;
+                if (!rook.touched) {
+                    nIdx += 1;
+                    while (nIdx < towerRightIdx) {
+                        const tile = board[nIdx];
+                        if (
+                            tile.figure === null &&
+                            this.tileOccupiedByEnemy(tile)
+                        ) {
+                            flg = false;
+                        }
+                        nIdx += 1;
+                    }
+                    if (flg)
+                        actions.push(
+                            new Action(
+                                this,
+                                this.index + 2,
+                                true,
+                                rook,
+                                this.index + 1
+                            )
+                        );
+                }
+            }
+        }
         return actions;
     }
 
-    addToAttacked = (idx: number) => {
-        this.attacked.add(idx);
-    };
+    tileOccupiedByEnemy(tile: ITile) {
+        return this.player === 1 ? tile.occupiedByBlack : tile.occupiedByWhite;
+    }
 }
 
 export default King;

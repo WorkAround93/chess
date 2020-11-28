@@ -56,6 +56,11 @@ class Pawn implements IFigure {
                 }
             }
         }
+        // en passant && promotion
+        const lastAction = state.actionHistory[state.actionHistory.length - 1];
+        const figure = lastAction.figure;
+        if (figure.type === FigureType.PAWN && figure.player !== this.player) {
+        }
         return actions;
     }
 
