@@ -63,8 +63,8 @@ class King implements IFigure {
         if (!this.touched && this.attacked.size === 0) {
             let flg = true;
             let nIdx = this.index;
-            const towerLeftIdx = nIdx - 3;
-            const towerRightIdx = nIdx + 4;
+            const towerLeftIdx = nIdx - 4;
+            const towerRightIdx = nIdx + 3;
             if (
                 board[towerLeftIdx].hasFigure() &&
                 board[towerLeftIdx].figure?.type === FigureType.ROOK

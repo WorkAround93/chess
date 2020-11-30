@@ -13,4 +13,5 @@ export interface IAction {
     flag: boolean;
     specialFigure: IFigure | null;
     specialTo: number | null;
+    from: number | null;
 }

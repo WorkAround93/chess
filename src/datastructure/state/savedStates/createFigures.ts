@@ -5,6 +5,7 @@ import Knight from "../../figure/figures/knight";
 import Bishop from "../../figure/figures/bishop";
 import King from "../../figure/figures/king";
 import Queen from "../../figure/figures/queen";
+import { FigureType } from "../../figure/enums/figureType";
 
 export const createFigures = (
     id: string,
@@ -12,10 +13,23 @@ export const createFigures = (
     index: number,
     type: number,
     touched: boolean | undefined,
-    attacked: Set<number> | undefined
+    attacked: Set<number> | undefined,
+    promoteTo: FigureType | undefined | null
 ): IFigure => {
     switch (type) {
         case 0:
+            if ((index >= 0 && index < 8) || (index > 55 && index < 64)) {
+                promoteTo = FigureType.QUEEN;
+                return createFigures(
+                    id,
+                    player,
+                    index,
+                    promoteTo,
+                    touched,
+                    attacked,
+                    undefined
+                );
+            }
             return new Pawn(player, index, id, touched);
         case 1:
             return new Rook(player, index, id, touched);

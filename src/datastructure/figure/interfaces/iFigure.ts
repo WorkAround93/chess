@@ -10,6 +10,7 @@ export interface IFigureAttr {
     type: FigureType;
     touched?: boolean;
     attacked?: Set<number>;
+    promoteTo?: FigureType | null;
 }
 
 export interface IFigure extends IFigureAttr {

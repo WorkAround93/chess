@@ -8,6 +8,7 @@ import { isValid } from "./moveValidation/isValid";
 import Action from "../action/action";
 import King from "../figure/figures/king";
 import { FigureType } from "../figure/enums/figureType";
+import Queen from "../figure/figures/queen";
 
 class State implements IState {
     board: ITile[];
@@ -41,9 +42,11 @@ class State implements IState {
     humanMove(iFrom: number, iTo: number): string {
         const actions =
             this.turn % 2 === 1 ? this.whiteActions : this.blackActions;
+
         actions.forEach((action) => {
             const { figure, to } = action;
             const { index } = figure;
+            console.log(iFrom, index, iTo, to);
             if (index === iFrom && iTo === to) {
                 return this.advance(action);
             }
@@ -54,6 +57,7 @@ class State implements IState {
     advance(action: IAction): string {
         if (this.terminal) return JSON.stringify(this);
         const { figure, to, flag, specialFigure, specialTo } = action;
+        console.log(figure);
         const tile = this.board[to];
         if (tile.figure !== null) {
             this.deleteFromFigures(tile.figure.player, tile.figure);
@@ -69,6 +73,7 @@ class State implements IState {
         figure.touched = flag;
         this.turn++;
         this.actionHistory.push(action);
+        console.log(this.board);
         return JSON.stringify(this);
     }
 
@@ -91,14 +96,23 @@ class State implements IState {
             this.board.push(new Tile((counter + i) % 2 === 0, i));
         }
         objectState.blackFigures.forEach((element: IFigure) => {
-            const { id, index, type, player, touched, attacked } = element;
+            const {
+                id,
+                index,
+                type,
+                player,
+                touched,
+                attacked,
+                promoteTo,
+            } = element;
             const fig: IFigure = createFigures(
                 id,
                 player,
                 index,
                 type,
                 touched,
-                attacked
+                attacked,
+                promoteTo
             );
             this.board[fig.index].figure = fig;
             this.blackFigures.push(fig);
@@ -108,14 +122,23 @@ class State implements IState {
             }
         });
         objectState.whiteFigures.forEach((element: IFigure) => {
-            const { id, index, type, player, touched, attacked } = element;
+            const {
+                id,
+                index,
+                type,
+                player,
+                touched,
+                attacked,
+                promoteTo,
+            } = element;
             const fig: IFigure = createFigures(
                 id,
                 player,
                 index,
                 type,
                 touched,
-                attacked
+                attacked,
+                promoteTo
             );
             this.board[fig.index].figure = fig;
             this.whiteFigures.push(fig);
@@ -124,11 +147,26 @@ class State implements IState {
             }
         });
         objectState.actionHistory.forEach((element: IAction) => {
-            const { figure, to, flag, specialFigure, specialTo } = element;
+            const {
+                figure,
+                to,
+                flag,
+                specialFigure,
+                specialTo,
+                from,
+            } = element;
             this.actionHistory.push(
-                new Action(figure, to, flag, specialFigure, specialTo)
+                new Action(figure, to, flag, specialFigure, specialTo, from)
             );
         });
+    }
+
+    promote(fig: IFigure, index: number): Action {
+        return new Action(
+            new Queen(fig.player, fig.index, fig.id),
+            index,
+            true
+        );
     }
 
     setTerminal() {

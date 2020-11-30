@@ -5,6 +5,7 @@ import { ITile } from "../../tile/interfaces/iTile";
 import { FigureType } from "../enums/figureType";
 import { inBound } from "../utils/inBound";
 import State from "../../state/state";
+import Queen from "./queen";
 
 class Pawn implements IFigure {
     id: string;
@@ -12,18 +13,21 @@ class Pawn implements IFigure {
     player: number;
     index: number;
     type: FigureType;
+    promoteTo: FigureType | null;
 
     constructor(
         player: number,
         index: number,
         id: string,
-        touched: boolean = false
+        touched: boolean = false,
+        promoteTo: FigureType | null = null
     ) {
         this.id = id;
         this.index = index;
         this.player = player;
         this.type = FigureType.PAWN;
         this.touched = touched;
+        this.promoteTo = promoteTo;
     }
 
     getMoves(state: State): IAction[] {
@@ -34,9 +38,14 @@ class Pawn implements IFigure {
         if (inBound(newIndex)) {
             if (this.canMove(board, newIndex)) {
                 actions.push(new Action(this, newIndex, true));
+
                 newIndex += direction;
-                if (!this.touched && this.canMove(board, newIndex))
-                    actions.push(new Action(this, newIndex, true));
+                if (!this.touched && this.canMove(board, newIndex)) {
+                    const fIdx: number = this.index;
+                    actions.push(
+                        new Action(this, newIndex, true, null, null, fIdx) // Added index from for en passant
+                    );
+                }
             }
             newIndex = direction + this.index;
             const left = newIndex - 1;
@@ -57,10 +66,30 @@ class Pawn implements IFigure {
             }
         }
         // en passant && promotion
+        if (state.actionHistory.length === 0) return actions;
         const lastAction = state.actionHistory[state.actionHistory.length - 1];
-        const figure = lastAction.figure;
-        if (figure.type === FigureType.PAWN && figure.player !== this.player) {
+        if (lastAction.from !== null) {
+            const { figure, from } = lastAction;
+            const figIdx = figure.index;
+            const modx = this.index % 8;
+            const mody = figIdx % 8;
+            if (
+                this.index + 1 == figIdx ||
+                (this.index - 1 === figIdx &&
+                    modx - mody !== 7 &&
+                    mody - modx !== 7)
+            ) {
+                actions.push(
+                    new Action(
+                        this,
+                        this.player === 1 ? from + 8 : from - 8,
+                        true,
+                        board[figIdx].figure
+                    )
+                );
+            }
         }
+
         return actions;
     }
 
